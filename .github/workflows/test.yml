@@ -1,0 +1,17 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [ "dev" ]
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_USERNAME: "meetacy-robot"
+      GITHUB_TOKEN: ${{ secrets.ROBOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Gradle Cache Setup
+        uses: gradle/gradle-build-action@v2
+      - run: ./gradlew test

@@ -1,0 +1,25 @@
+name: Production Deploy
+
+on:
+  push:
+    branches: [ "dev" ]
+  workflow_dispatch:
+
+jobs:
+  production-deploy:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_USERNAME: "meetacy-robot"
+      GITHUB_TOKEN: ${{ secrets.ROBOT_TOKEN }}
+      IS_RUNNER: "true"
+      DEPLOY_DESTINATION: ${{ secrets.DEPLOY_DESTINATION }}
+      DEPLOY_SERVICE_NAME: ${{ secrets.DEPLOY_SERVICE_NAME }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Gradle Cache Setup
+        uses: gradle/gradle-build-action@v2
+      - run: ./gradlew productionDeploy
