@@ -26,6 +26,7 @@ suspend fun main(): Unit = coroutineScope {
 
     val token = System.getenv("BOT_TOKEN")
     val secretBotKey = System.getenv("SECRET_KEY").let(::SecretTelegramBotKey)
+    val secretBotKeySize = 256
 
     val bot = telegramBot(token)
     val meetacy = MeetacyApi.production()
@@ -53,22 +54,30 @@ suspend fun main(): Unit = coroutineScope {
             }
 
             val commandParts = content.text.split(" ")
+
+            suspend fun sendStartMessage() = bot.sendMessage(
+                chat = message.chat,
+                text = "Welcome to Meetacy Service Bot that helps with authorization by Telegram. " +
+                        "For now there is no other functions. To follow up with our news, subscribe to our channel ⬇\uFE0F⬇\uFE0F⬇\uFE0F",
+                replyMarkup = inlineKeyboard {
+                    +URLInlineKeyboardButton(
+                        text = "@meetacy",
+                        url = "https://t.me/meetacy"
+                    )
+                }
+            )
+
             if (commandParts.size != 2) {
-                bot.sendMessage(
-                    chat = message.chat,
-                    text = "Welcome to Meetacy Service Bot that helps with authorization by Telegram. " +
-                            "For now there is no other functions. To follow up with our news, subscribe to our channel ⬇\uFE0F⬇\uFE0F⬇\uFE0F",
-                    replyMarkup = inlineKeyboard {
-                        +URLInlineKeyboardButton(
-                            text = "@meetacy",
-                            url = "https://t.me/meetacy"
-                        )
-                    }
-                )
+                sendStartMessage()
                 return@onEach
             }
 
             val (_, temporalHash) = commandParts
+
+            if (temporalHash.length != secretBotKeySize) {
+                sendStartMessage()
+                return@onEach
+            }
 
             scope.launch {
                 meetacy.auth.telegram.finish(
