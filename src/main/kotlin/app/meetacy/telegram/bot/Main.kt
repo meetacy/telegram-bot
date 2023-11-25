@@ -1,6 +1,7 @@
 package app.meetacy.telegram.bot
 
 import app.meetacy.sdk.MeetacyApi
+import app.meetacy.sdk.exception.MeetacyInternalException
 import app.meetacy.sdk.production
 import app.meetacy.sdk.types.auth.telegram.SecretTelegramBotKey
 import app.meetacy.sdk.types.auth.telegram.TemporalTelegramHash
@@ -74,12 +75,7 @@ suspend fun main(): Unit = coroutineScope {
 
             val (_, temporalHash) = commandParts
 
-            if (temporalHash.length != secretBotKeySize) {
-                sendStartMessage()
-                return@onEach
-            }
-
-            scope.launch {
+            try {
                 meetacy.auth.telegram.finish(
                     temporalHash = TemporalTelegramHash(temporalHash),
                     secretBotKey = secretBotKey,
@@ -88,18 +84,22 @@ suspend fun main(): Unit = coroutineScope {
                     firstName = message.from.firstName,
                     lastName = message.from.lastName
                 )
+                bot.sendMessage(
+                    chat = message.chat,
+                    text = "You have successfully authorized using your Telegram account, you can now return to the app. To follow up with our news, subscribe to our channel ⬇\uFE0F⬇\uFE0F⬇\uFE0F",
+                    replyMarkup = inlineKeyboard {
+                        +URLInlineKeyboardButton(
+                            text = "@meetacy",
+                            url = "https://t.me/meetacy"
+                        )
+                    }
+                )
+            } catch (error: MeetacyInternalException) {
+                bot.sendMessage(
+                    chat = message.chat,
+                    text = "Sorry, for some reason we couldn't authorize you. Try again later..."
+                )
             }
-
-            bot.sendMessage(
-                chat = message.chat,
-                text = "You have successfully authorized using your Telegram account, you can now return to the app. To follow up with our news, subscribe to our channel ⬇\uFE0F⬇\uFE0F⬇\uFE0F",
-                replyMarkup = inlineKeyboard {
-                    +URLInlineKeyboardButton(
-                        text = "@meetacy",
-                        url = "https://t.me/meetacy"
-                    )
-                }
-            )
         }.launchIn(scope)
     }
 }
