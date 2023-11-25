@@ -26,7 +26,7 @@ suspend fun main(): Unit = coroutineScope {
 
     val token = System.getenv("BOT_TOKEN")
     val secretBotKey = System.getenv("SECRET_KEY").let(::SecretTelegramBotKey)
-    val secretBotKeySize = 256
+    val secretBotKeySize = 64
 
     val bot = telegramBot(token)
     val meetacy = MeetacyApi.production()
