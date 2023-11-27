@@ -14,6 +14,7 @@ application {
 dependencies {
     implementation(libs.ktgbotapi)
     implementation(libs.meetacy.sdk.api.ktor)
+    implementation(libs.slf4j.simple)
 }
 
 val propertiesFile: File = rootProject.file("deploy.properties")

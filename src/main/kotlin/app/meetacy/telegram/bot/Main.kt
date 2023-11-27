@@ -27,7 +27,6 @@ suspend fun main(): Unit = coroutineScope {
 
     val token = System.getenv("BOT_TOKEN")
     val secretBotKey = System.getenv("SECRET_KEY").let(::SecretTelegramBotKey)
-    val secretBotKeySize = 64
 
     val bot = telegramBot(token)
     val meetacy = MeetacyApi.production()
@@ -80,7 +79,7 @@ suspend fun main(): Unit = coroutineScope {
                     temporalHash = TemporalTelegramHash(temporalHash),
                     secretBotKey = secretBotKey,
                     telegramId = message.from.id.chatId,
-                    username = message.from.username?.username,
+                    username = message.from.username?.usernameWithoutAt,
                     firstName = message.from.firstName,
                     lastName = message.from.lastName
                 )
